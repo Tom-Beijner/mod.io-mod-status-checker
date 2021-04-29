@@ -1,6 +1,6 @@
 # Mod.io mod status checker
 
-A JavaScript based application to check if mods become hidden (or deleted) and sends a webhook message about the newly affected mod.
+A JavaScript based application to check if mods become hidden (or deleted) and sends a Discord based webhook message about the newly affected mod.
 
 ## Installation
 
