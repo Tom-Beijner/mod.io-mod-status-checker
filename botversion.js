@@ -80,7 +80,7 @@ bot.connect();
 // $.ajax({
 //     url: "https://api.mod.io/v1/games/169/mods/events",
 //     method: "get",
-//     data: { api_key: "8193bd125edf6a28ee693f67a4afa14c" },
+//     data: { api_key: "" },
 //     headers: headers,
 //     success: function (data) {
 //         console.log(data.result_total);
@@ -98,7 +98,7 @@ bot.connect();
 //                     (i + 1) * 100
 //                 }`,
 //                 method: "get",
-//                 data: { api_key: "8193bd125edf6a28ee693f67a4afa14c" },
+//                 data: { api_key: "" },
 //                 headers: headers,
 //                 success: function (data) {
 //                     unavailableMods = data.data.filter((mod) =>
