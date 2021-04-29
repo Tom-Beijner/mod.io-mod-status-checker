@@ -18,6 +18,8 @@ yarn install
 
 ## Usage
 
+Rename `example.config.json` file to `config.json` and edit the values then run one of the following commands (depending on if you use npm or yarn)
+
 ```bash
 npm run start
 ```
