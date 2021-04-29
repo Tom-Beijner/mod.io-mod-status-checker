@@ -1,0 +1,19 @@
+{
+    "name": "mod.io-dogwater",
+    "version": "1.0.0",
+    "main": "index.js",
+    "license": "MIT",
+    "scripts": {
+        "start": "node index.js",
+        "dev": "nodemon index.js"
+    },
+    "dependencies": {
+        "arr-diff": "^4.0.0",
+        "crud-object-diff": "^2.2.3",
+        "eris": "^0.15.0",
+        "node-fetch": "^2.6.1"
+    },
+    "devDependencies": {
+        "nodemon": "^2.0.7"
+    }
+}
