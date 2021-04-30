@@ -8,7 +8,6 @@
         "dev": "nodemon index.js"
     },
     "dependencies": {
-        "arr-diff": "^4.0.0",
         "crud-object-diff": "^2.2.3",
         "eris": "^0.15.0",
         "node-fetch": "^2.6.1"

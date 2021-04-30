@@ -6,33 +6,28 @@ const config = require("./config.json");
 
 const mordhauID = 169;
 
-// {
-//   id: int,
-//   name: string
-// }
+let firstRun = true;
 let lastRunMods = [];
 
 async function main() {
     console.log(
-        `Finding ${
-            lastRunMods.length ? "newly" : "current"
-        } hidden/deleted mods`
+        `Finding ${firstRun ? "current" : "newly"} hidden/unhidden mods`
     );
 
     const modsCount = (
         await (
             await fetch(
-                `https://api.mod.io/v1/games/${mordhauID}?api_key=${config.modio.api_key}`,
+                `https://api.mod.io/v1/games/${mordhauID}/mods?_limit=1&visible-in=0&api_key=${config.modio.api_key}`,
                 {
                     headers: { "Content-Type": "application/json" },
                 }
             )
         ).json()
-    ).stats.mods_count_total;
+    ).result_total;
 
     console.log(`Found ${modsCount} mods`);
 
-    const result = [];
+    let hiddenMods = [];
     const totalPages = Math.ceil(modsCount / 100);
 
     for (let i = 0; i < totalPages; i++) {
@@ -44,20 +39,17 @@ async function main() {
                     console.debug(`Fetching page ${page + 1} of ${totalPages}`);
 
                     const res = await fetch(
-                        `https://api.mod.io/v1/games/${mordhauID}/mods/events?_offset=${page}&api_key=${config.modio.api_key}`,
+                        `https://api.mod.io/v1/games/${mordhauID}/mods?&visible-in=0&_offset=${page}&api_key=${config.modio.api_key}`,
                         {
                             headers: { "Content-Type": "application/json" },
                         }
                     );
                     const json = await res.json();
+
                     json.data
-                        .filter((mod) =>
-                            ["MOD_UNAVAILABLE", "MOD_DELETED"].includes(
-                                mod.event_type
-                            )
-                        )
+                        .filter((mod) => mod.visible === 0)
                         .forEach((mod) =>
-                            result.push({
+                            hiddenMods.push({
                                 id: mod.id,
                                 name: mod.name,
                                 url: `https://mordhau.mod.io/${mod.name_id}`,
@@ -72,10 +64,15 @@ async function main() {
         });
     }
 
-    if (lastRunMods.length) {
+    hiddenMods = hiddenMods.filter(
+        (obj, index, self) =>
+            index === self.findIndex((mod) => mod.id === obj.id)
+    );
+
+    if (!firstRun) {
         const { createdVals, deletedVals } = compareObjectVals([
             lastRunMods,
-            result,
+            hiddenMods,
         ]);
 
         console.log(
@@ -85,31 +82,37 @@ async function main() {
         );
 
         if (createdVals || deletedVals) {
+            const changed = [...(createdVals || []), ...(deletedVals || [])];
+            const fields = [];
+
+            if (createdVals) {
+                fields.push({
+                    name: `Hidden mods (${createdVals.length})`,
+                    value: createdVals
+                        .map((mod) => `[${mod.name}](${mod.url}) (${mod.id})`)
+                        .join("\n"),
+                });
+            }
+
+            if (deletedVals) {
+                fields.push({
+                    name: `Unhidden mods (${deletedVals.length})`,
+                    value: deletedVals
+                        .map((mod) => `[${mod.name}](${mod.url}) (${mod.id})`)
+                        .join("\n"),
+                });
+            }
+
             sendEmbed(config.webhook, {
-                title: `Newly hidden/deleted mods (${createdVals.length})`,
-                fields: [
-                    createdVals && {
-                        name: `Newly hidden/deleted mods (${createdVals.length})`,
-                        value: createdVals
-                            .map(
-                                (mod) => `[${mod.name}](${mod.url}) (${mod.id})`
-                            )
-                            .join("\n"),
-                    },
-                    deletedVals && {
-                        name: `Unhidden mods ${deletedVals.length}`,
-                        value: deletedVals
-                            .map(
-                                (mod) => `[${mod.name}](${mod.url}) (${mod.id})`
-                            )
-                            .join("\n"),
-                    },
-                ],
+                title: `Newly hidden/unhidden mods (${changed.length})`,
+                fields,
             });
         }
     }
 
-    lastRunMods = result;
+    lastRunMods = hiddenMods;
+
+    if (firstRun) firstRun = false;
 
     setTimeout(() => {
         main();
