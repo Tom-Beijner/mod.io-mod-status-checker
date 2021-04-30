@@ -11,7 +11,9 @@ let lastRunMods = [];
 
 async function main() {
     console.log(
-        `Finding ${firstRun ? "current" : "newly"} hidden/unhidden mods`
+        `Finding ${firstRun ? "current" : "newly"} hidden${
+            !firstRun && config.show_unhidden ? "/unhidden" : ""
+        } mods`
     );
 
     const modsCount = (
@@ -77,11 +79,13 @@ async function main() {
 
         console.log(
             `Finished processing mods\n`,
-            `- Found ${createdVals?.length || 0} newly hidden/deleted mods\n`,
-            `- Found ${deletedVals?.length || 0} newly unhidden mods`
+            `- Found ${createdVals?.length || 0} newly hidden mods`,
+            config.show_unhidden
+                ? `\n - Found ${deletedVals?.length || 0} newly unhidden mods`
+                : ""
         );
 
-        if (createdVals || deletedVals) {
+        if (createdVals || (config.show_unhidden && deletedVals)) {
             const changed = [...(createdVals || []), ...(deletedVals || [])];
             const fields = [];
 
@@ -94,7 +98,7 @@ async function main() {
                 });
             }
 
-            if (deletedVals) {
+            if (config.show_unhidden && deletedVals) {
                 fields.push({
                     name: `Unhidden mods (${deletedVals.length})`,
                     value: deletedVals
@@ -104,7 +108,9 @@ async function main() {
             }
 
             sendEmbed(config.webhook, {
-                title: `Newly hidden/unhidden mods (${changed.length})`,
+                title: `Newly hidden${
+                    config.show_unhidden ? "/unhidden" : ""
+                } mods (${changed.length})`,
                 fields,
             });
         }
