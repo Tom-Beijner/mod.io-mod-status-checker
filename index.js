@@ -1,7 +1,7 @@
 const fetch = require("node-fetch");
 const { compareObjectVals } = require("crud-object-diff");
 
-const { sendEmbed } = require("./functions/sendEmbed");
+const { send } = require("./functions/send");
 const config = require("./config.json");
 
 const mordhauID = 169;
@@ -107,7 +107,7 @@ async function main() {
                 });
             }
 
-            sendEmbed(config.webhook, {
+            send({
                 title: `Newly hidden${
                     config.show_unhidden ? "/unhidden" : ""
                 } mods (${changed.length})`,
